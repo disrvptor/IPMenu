@@ -29,14 +29,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     internal var defaultIF: String?;
 
     func applicationDidFinishLaunching(aNotification: NSNotification) {
-        //self.statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
         statusItem = NSStatusBar.systemStatusBar().statusItemWithLength(NSVariableStatusItemLength);
-        // TODO: There is a linker error that doesn't resolve NSVariableStatusItemLength
-        // http://stackoverflow.com/questions/24024723/swift-using-nsstatusbar-statusitemwithlength-and-nsvariablestatusitemlength
-//        statusItem = NSStatusBar.systemStatusBar().statusItemWithLength(-1);
 
-        defaultIF = NetworkUtils.getDefaultGatewayInterface();
-        addresses = NetworkUtils.getIFAddresses();
         updateIPAddress();
 
         timer = NSTimer.scheduledTimerWithTimeInterval(1.5, target: self, selector: "updateIPAddress", userInfo: nil, repeats: true);
@@ -56,13 +50,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         var equal:Bool = true;
 
         // Compare addresses
-        if ( _addresses.count != addresses!.count ) {
+        if ( nil == addresses || _addresses.count != addresses!.count ) {
             equal = false;
         } else {
             // count is equal, but contents may be different
             for (name,address) in _addresses {
                 let addr = addresses![name];
-                // Note: IPv6 addresses keep on regenerating their lower half...need to figure out why
+                // Note: IPv6 addresses on utun0 keep on regenerating their lower half...need to figure out why
                 if ( NSComparisonResult.OrderedSame != address.compare(addr!) ) {
                     equal = false;
                     break;
@@ -105,7 +99,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             _defaultIF = "en0";
         }
 
-        if ( NSComparisonResult.OrderedSame != _defaultIF!.compare(defaultIF!) || !equal ) {
+        if ( nil == defaultIF || NSComparisonResult.OrderedSame != _defaultIF!.compare(defaultIF!) || !equal ) {
             defaultIF = _defaultIF;
 
             print("Detected new default interface or addresses... Regenerating menu title");
