@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FFC632821BAA623A0028A613 /* NetworkUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFC632811BAA623A0028A613 /* NetworkUtils.swift */; };
 		FFF713451B975643001612E9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFF713441B975643001612E9 /* AppDelegate.swift */; };
 		FFF713471B975643001612E9 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FFF713461B975643001612E9 /* Images.xcassets */; };
 		FFF7134A1B975643001612E9 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = FFF713481B975643001612E9 /* MainMenu.xib */; };
@@ -24,6 +25,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		FFC632811BAA623A0028A613 /* NetworkUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkUtils.swift; sourceTree = "<group>"; };
 		FFF7133F1B975643001612E9 /* IP Menu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "IP Menu.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FFF713431B975643001612E9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FFF713441B975643001612E9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -79,6 +81,7 @@
 				FFF713461B975643001612E9 /* Images.xcassets */,
 				FFF713481B975643001612E9 /* MainMenu.xib */,
 				FFF713421B975643001612E9 /* Supporting Files */,
+				FFC632811BAA623A0028A613 /* NetworkUtils.swift */,
 			);
 			path = "IP Menu";
 			sourceTree = "<group>";
@@ -152,7 +155,9 @@
 		FFF713371B975643001612E9 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0640;
+				LastSwiftMigration = 0700;
+				LastSwiftUpdateCheck = 0700;
+				LastUpgradeCheck = 0700;
 				TargetAttributes = {
 					FFF7133E1B975643001612E9 = {
 						CreatedOnToolsVersion = 6.4;
@@ -206,6 +211,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FFC632821BAA623A0028A613 /* NetworkUtils.swift in Sources */,
 				FFF713451B975643001612E9 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -261,6 +267,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -327,6 +334,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "IP Menu/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.disrvptor.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "IP Menu-Bridging-Header.h";
 				USER_HEADER_SEARCH_PATHS = "";
@@ -340,6 +348,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "IP Menu/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.disrvptor.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "IP Menu-Bridging-Header.h";
 				USER_HEADER_SEARCH_PATHS = "";
@@ -361,6 +370,7 @@
 				);
 				INFOPLIST_FILE = "IP MenuTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.disrvptor.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IP Menu.app/Contents/MacOS/IP Menu";
 			};
@@ -377,6 +387,7 @@
 				);
 				INFOPLIST_FILE = "IP MenuTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.disrvptor.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IP Menu.app/Contents/MacOS/IP Menu";
 			};

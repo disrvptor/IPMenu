@@ -9,6 +9,7 @@
 #ifndef IP_Menu_IP_Menu_Bridging_Header_h
 #define IP_Menu_IP_Menu_Bridging_Header_h
 
-#include <ifaddrs.h>
+#include "ifaddrs.h"
+#include "net/if_dl.h"
 
 #endif
