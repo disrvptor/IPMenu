@@ -133,18 +133,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 ).takeRetainedValue() as LSSharedFileListRef?
             if loginItemsRef != nil {
                 let loginItems: NSArray = LSSharedFileListCopySnapshot(loginItemsRef, nil).takeRetainedValue() as NSArray
-                let lastItemRef: LSSharedFileListItemRef = loginItems.lastObject as! LSSharedFileListItemRef
-                for var i = 0; i < loginItems.count; ++i {
-                    let currentItemRef: LSSharedFileListItemRef = loginItems.objectAtIndex(i) as! LSSharedFileListItemRef
-                    if let urlRef: Unmanaged<CFURL> = LSSharedFileListItemCopyResolvedURL(currentItemRef, 0, nil) {
-                        let urlRef:NSURL = urlRef.takeRetainedValue();
-                        if urlRef.isEqual(appUrl) {
-                            return (currentItemRef, lastItemRef)
+                if ( loginItems.count > 0 ) {
+                    let lastItemRef: LSSharedFileListItemRef = loginItems.lastObject as! LSSharedFileListItemRef
+                    for var i = 0; i < loginItems.count; ++i {
+                        let currentItemRef: LSSharedFileListItemRef = loginItems.objectAtIndex(i) as! LSSharedFileListItemRef
+                        if let urlRef: Unmanaged<CFURL> = LSSharedFileListItemCopyResolvedURL(currentItemRef, 0, nil) {
+                            let urlRef:NSURL = urlRef.takeRetainedValue();
+                            if urlRef.isEqual(appUrl) {
+                                return (currentItemRef, lastItemRef)
+                            }
+                        } else {
+                            print("Unknown login application");
                         }
                     }
+                    //The application was not found in the startup list
+                    return (nil, lastItemRef)
+                } else {
+                    let addatstart: LSSharedFileListItemRef = kLSSharedFileListItemBeforeFirst.takeRetainedValue()
+                    return(nil,addatstart)
                 }
-                //The application was not found in the startup list
-                return (nil, lastItemRef)
             }
         }
         return (nil, nil)
