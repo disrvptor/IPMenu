@@ -49,6 +49,34 @@ class NetworkUtils {
     }
 
     // Retrieve the default interface name that requests are routed through
+    // using shell commands, which are more stable than converted code
+    // For example, "en0" or "utun0"
+    static func getDefaultGatewayInterfaceShell() -> String? {
+        // http://practicalswift.com/2014/06/25/how-to-execute-shell-commands-from-swift/
+        let task = NSTask()
+        task.launchPath = "/sbin/route"
+        task.arguments = ["get", "0.0.0.0"]
+        
+        let pipe = NSPipe()
+        task.standardOutput = pipe
+        task.launch()
+        
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        let output = NSString(data: data, encoding: NSUTF8StringEncoding)
+
+        // Scan output for "^\s*interface:\s+(ifX)\s*$"
+        let lines = output?.componentsSeparatedByString("\n");
+        for line in lines! {
+            //let line2 = line.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet());
+            if let range = line.rangeOfString("interface: ") {
+                return line.substringFromIndex(range.endIndex);
+            }
+        }
+
+        return nil;
+    }
+
+    // Retrieve the default interface name that requests are routed through
     // For example, "en0" or "utun0"
     static func getDefaultGatewayInterface() -> String? {
         let s = socket(PF_ROUTE, SOCK_RAW, 0);

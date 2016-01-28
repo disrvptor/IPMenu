@@ -21,7 +21,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     internal var statusItem: NSStatusItem?;
     
     //@property (assign, nonatomic) BOOL darkModeOn;
-    internal var darkModeOn: Bool = false;
+    //internal var darkModeOn: Bool = false;
     
     internal var timer: NSTimer?;
 
@@ -30,6 +30,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(aNotification: NSNotification) {
         statusItem = NSStatusBar.systemStatusBar().statusItemWithLength(NSVariableStatusItemLength);
+
+        // TODO: Figure out ho to modify this for dev/test vs production
+        ConsoleLog.setCurrentLevel(ConsoleLog.Level.Debug);
 
         updateIPAddress();
 
@@ -45,7 +48,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func updateIPAddress() {
         let _addresses = NetworkUtils.getIFAddresses();
-        var _defaultIF = NetworkUtils.getDefaultGatewayInterface();
+        // Disable this for now because it looks like it may be causing the OS to deadlock
+        //var _defaultIF: String? = "en0"; //NetworkUtils.getDefaultGatewayInterface();
+        var _defaultIF: String? = NetworkUtils.getDefaultGatewayInterfaceShell();
+
 
         var equal:Bool = true;
 
@@ -65,10 +71,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         if ( !equal ) {
+            ConsoleLog.debug("Detected new addresses \(addresses) -> \(_addresses)");
+
             addresses = _addresses;
-
-            print("Detected new addresses... Regenerating menu");
-
+            
             // Regenerate menu
             let menu = NSMenu();
             if ( addresses!.count > 0 ) {
@@ -99,10 +105,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             _defaultIF = "en0";
         }
 
+        // Debug
+        if ( nil == defaultIF || NSComparisonResult.OrderedSame != _defaultIF!.compare(defaultIF!) ) {
+            ConsoleLog.debug("Detected new default interface (\(defaultIF) -> \(_defaultIF))");
+        }
+
         if ( nil == defaultIF || NSComparisonResult.OrderedSame != _defaultIF!.compare(defaultIF!) || !equal ) {
             defaultIF = _defaultIF;
-
-            print("Detected new default interface or addresses... Regenerating menu title");
 
             if ( nil == addresses || nil == addresses![defaultIF!] ) {
                 statusItem!.title = "127.0.0.1";
