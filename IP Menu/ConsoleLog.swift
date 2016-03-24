@@ -20,11 +20,11 @@ class ConsoleLog {
     private static var currentLevel = Level.Info;
 
     static func getCurrentLevel() -> Level {
-        return currentLevel;
+        return ConsoleLog.currentLevel;
     }
 
     static func setCurrentLevel(level: Level) {
-        currentLevel = level;
+        ConsoleLog.currentLevel = level;
     }
 
     static func debug(msg: String) {
@@ -44,7 +44,7 @@ class ConsoleLog {
     }
 
     static func log(level: Level, msg: String) {
-        if ( isLevelEnabled(level) ) {
+        if ( ConsoleLog.isLevelEnabled(level) ) {
             // ISO 8601
             let date = NSDate()
             let formatter = NSDateFormatter()
@@ -56,7 +56,7 @@ class ConsoleLog {
     }
 
     static func isLevelEnabled(level: Level) -> Bool {
-        switch (currentLevel) {
+        switch (ConsoleLog.currentLevel) {
         case .Debug: return true;
         case .Info: return (level != .Debug);
         case .Warning: return (level != .Debug && level != .Info);

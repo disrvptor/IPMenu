@@ -25,7 +25,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     internal var timer: NSTimer?;
 
-    internal var addresses: [String:String]?;
+    internal var addresses: [String:[sa_family_t:[String]]]?;
     internal var defaultIF: String?;
 
     func applicationDidFinishLaunching(aNotification: NSNotification) {
@@ -39,49 +39,37 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         timer = NSTimer.scheduledTimerWithTimeInterval(1.5, target: self, selector: "updateIPAddress", userInfo: nil, repeats: true);
         timer!.tolerance = 0.5;
     }
-    
+
     func applicationWillTerminate(aNotification: NSNotification) {
         timer = nil;
         NSStatusBar.systemStatusBar().removeStatusItem(statusItem!);
         statusItem = nil;
     }
-    
+
     func updateIPAddress() {
         let _addresses = NetworkUtils.getIFAddresses();
         // Disable this for now because it looks like it may be causing the OS to deadlock
         //var _defaultIF: String? = "en0"; //NetworkUtils.getDefaultGatewayInterface();
         var _defaultIF: String? = NetworkUtils.getDefaultGatewayInterfaceShell();
 
-
-        var equal:Bool = true;
-
-        // Compare addresses
-        if ( nil == addresses || _addresses.count != addresses!.count ) {
-            equal = false;
-        } else {
-            // count is equal, but contents may be different
-            for (name,address) in _addresses {
-                let addr = addresses![name];
-                // Note: IPv6 addresses on utun0 keep on regenerating their lower half...need to figure out why
-                if ( NSComparisonResult.OrderedSame != address.compare(addr!) ) {
-                    equal = false;
-                    break;
-                }
-            }
-        }
+        let equal = compareAddresses(self.addresses, newA: _addresses);
 
         if ( !equal ) {
             ConsoleLog.debug("Detected new addresses \(addresses) -> \(_addresses)");
 
             addresses = _addresses;
-            
+
             // Regenerate menu
             let menu = NSMenu();
             if ( addresses!.count > 0 ) {
                 var index: Int = 1;
-                for (name,address) in Array(addresses!).sort({$0.0 < $1.0}) {
-                    menu.addItem(NSMenuItem(title: "\(name): \(address)\n", action: Selector(), keyEquivalent: ""));
-                    index++;
+                for (name,protoMap) in Array(addresses!).sort({$0.0 < $1.0}) {
+                    for (_,addressArray) in protoMap {
+                        for address in addressArray {
+                            menu.addItem(NSMenuItem(title: "\(name): \(address)\n", action: Selector(), keyEquivalent: ""));
+                            index++;
+                        }
+                    }
                 }
                 menu.addItem(NSMenuItem.separatorItem());
             }
@@ -110,16 +98,63 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             ConsoleLog.debug("Detected new default interface (\(defaultIF) -> \(_defaultIF))");
         }
 
+        // Pick the default address as the title
+        var addr = "127.0.0.1"
         if ( nil == defaultIF || NSComparisonResult.OrderedSame != _defaultIF!.compare(defaultIF!) || !equal ) {
             defaultIF = _defaultIF;
 
-            if ( nil == addresses || nil == addresses![defaultIF!] ) {
-                statusItem!.title = "127.0.0.1";
-            } else {
-                statusItem!.title = addresses![defaultIF!];
+            if ( nil != addresses && nil != addresses![defaultIF!] ) {
+                // Prefer ipv4 over ipv6
+                let defaultProtoMap = addresses![defaultIF!];
+                let ipv4 = defaultProtoMap![UInt8(AF_INET)];
+                let ipv6 = defaultProtoMap![UInt8(AF_INET6)];
+                if ( nil != ipv4 && ipv4?.count > 0 ) {
+                    addr = ipv4![0];
+                } else if ( nil != ipv6 && ipv6?.count > 0 ) {
+                    addr = ipv6![0];
+                }
+            }
+        }
+        statusItem!.title = addr;
+    }
+
+    func compareAddresses(oldA:[String:[sa_family_t:[String]]]?, newA:[String:[sa_family_t:[String]]]) -> Bool {
+        if ( nil == oldA || newA.count != oldA!.count ) {
+            return false;
+        } else {
+            // count is equal, but contents may be different, so
+            // iterate over the new addresses
+            for (name,newProtoMap) in newA {
+                
+                // Check to see if this interface is previously seen
+                guard let oldProtoMap = oldA![name] else {
+                    return false;
+                }
+                
+                for (newProto,newAddresses) in newProtoMap {
+                    guard let oldAddresses = oldProtoMap[newProto] else {
+                        return false;
+                    }
+                    
+                    // Check the actual addresses
+                    var found = false;
+                    for newAddr in newAddresses {
+                        for oldAddr in oldAddresses {
+                            // Now check if there are the same addresses as previous
+                            if ( NSComparisonResult.OrderedSame == newAddr.compare(oldAddr) ) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if ( !found ) {
+                            return false;
+                        }
+                    }
+                }
             }
         }
 
+        return true;
     }
 
     func about() {
@@ -132,7 +167,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationIsInStartUpItems() -> Bool {
         return (itemReferencesInLoginItems().existingReference != nil)
     }
-    
+
     func itemReferencesInLoginItems() -> (existingReference: LSSharedFileListItemRef?, lastReference: LSSharedFileListItemRef?) {
         if let appUrl : NSURL = NSURL.fileURLWithPath(NSBundle.mainBundle().bundlePath) {
             let loginItemsRef = LSSharedFileListCreate(

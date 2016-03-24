@@ -11,40 +11,51 @@ import Foundation
 class NetworkUtils {
 
     // http://stackoverflow.com/questions/28084853/how-to-get-the-local-host-ip-address-on-iphone-in-swift
-    static func getIFAddresses() -> [String: String] {
-        var addresses = [String: String]()
-        
+    static func getIFAddresses() -> [String: [sa_family_t: [String]]] {
+        var addresses = [String: [sa_family_t: [String]]]();
+
         // Get list of all interfaces on the local machine:
         var ifaddr : UnsafeMutablePointer<ifaddrs> = nil
         if getifaddrs(&ifaddr) == 0 {
-            
+
             // For each interface ...
             for (var ptr = ifaddr; ptr != nil; ptr = ptr.memory.ifa_next) {
                 let flags = Int32(ptr.memory.ifa_flags)
                 var addr = ptr.memory.ifa_addr.memory
                 let name = String.fromCString(ptr.memory.ifa_name);
-                
+
                 // Check for running IPv4, IPv6 interfaces. Skip the loopback interface.
                 if (flags & (IFF_UP|IFF_RUNNING|IFF_LOOPBACK)) == (IFF_UP|IFF_RUNNING) {
                     if addr.sa_family == UInt8(AF_INET) || addr.sa_family == UInt8(AF_INET6) {
-                        
-                        //println(ifaddrsToString(ptr));
-                        
+
                         // Convert interface address to a human readable string:
                         var hostname = [CChar](count: Int(NI_MAXHOST), repeatedValue: 0)
                         if (getnameinfo(&addr, socklen_t(addr.sa_len), &hostname, socklen_t(hostname.count),
                             nil, socklen_t(0), NI_NUMERICHOST) == 0) {
-                                if let address = String.fromCString(hostname) {
-                                    //addresses.append(address);
-                                    addresses[name!] = address;
+                                guard let address = String.fromCString(hostname) else {
+                                    continue;
                                 }
+
+                                // Note: If there are multiple addresses (eg ipv4 and ipv6)
+                                // associated with the same interface then whatever the last
+                                // one in is wins.
+                                ConsoleLog.debug("Saving \(name!) with \(address) and flags \(flags)");
+
+                                if ( nil == addresses[name!] ) {
+                                    addresses[name!] = [sa_family_t:[String]]();
+                                }
+
+                                if ( nil == addresses[name!]![addr.sa_family] ) {
+                                    addresses[name!]![addr.sa_family] = [String]();
+                                }
+                                addresses[name!]![addr.sa_family]?.append(address);
                         }
                     }
                 }
             }
             freeifaddrs(ifaddr)
         }
-        
+
         return addresses
     }
 
