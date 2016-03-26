@@ -112,10 +112,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     addr = ipv4![0];
                 } else if ( nil != ipv6 && ipv6?.count > 0 ) {
                     addr = ipv6![0];
+                } else {
+                    print("No ipv4 or ipv6 addresses detected");
+                    addr = "127.0.0.1";
                 }
             }
+            statusItem!.title = addr;
+        } else {
+            print("No Changes \(defaultIF), \(_defaultIF), \(equal)");
         }
-        statusItem!.title = addr;
     }
 
     func compareAddresses(oldA:[String:[sa_family_t:[String]]]?, newA:[String:[sa_family_t:[String]]]) -> Bool {
