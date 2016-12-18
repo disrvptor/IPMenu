@@ -23,26 +23,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     //@property (assign, nonatomic) BOOL darkModeOn;
     //internal var darkModeOn: Bool = false;
     
-    internal var timer: NSTimer?;
+    internal var timer: Timer?;
 
     internal var addresses: [String:[sa_family_t:[String]]]?;
     internal var defaultIF: String?;
 
-    func applicationDidFinishLaunching(aNotification: NSNotification) {
-        statusItem = NSStatusBar.systemStatusBar().statusItemWithLength(NSVariableStatusItemLength);
+    func applicationDidFinishLaunching(_ aNotification: Notification) {
+        statusItem = NSStatusBar.system().statusItem(withLength: NSVariableStatusItemLength);
 
         // TODO: Figure out ho to modify this for dev/test vs production
         ConsoleLog.setCurrentLevel(ConsoleLog.Level.Debug);
 
         updateIPAddress();
 
-        timer = NSTimer.scheduledTimerWithTimeInterval(1.5, target: self, selector: "updateIPAddress", userInfo: nil, repeats: true);
+        timer = Timer.scheduledTimer(timeInterval: 1.5, target: self, selector: #selector(AppDelegate.updateIPAddress), userInfo: nil, repeats: true);
         timer!.tolerance = 0.5;
     }
 
-    func applicationWillTerminate(aNotification: NSNotification) {
+    func applicationWillTerminate(_ aNotification: Notification) {
         timer = nil;
-        NSStatusBar.systemStatusBar().removeStatusItem(statusItem!);
+        NSStatusBar.system().removeStatusItem(statusItem!);
         statusItem = nil;
     }
 
@@ -63,15 +63,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let menu = NSMenu();
             if ( addresses!.count > 0 ) {
                 var index: Int = 1;
-                for (name,protoMap) in Array(addresses!).sort({$0.0 < $1.0}) {
+                for (name,protoMap) in Array(addresses!).sorted(by: {$0.0 < $1.0}) {
                     for (_,addressArray) in protoMap {
                         for address in addressArray {
-                            menu.addItem(NSMenuItem(title: "\(name): \(address)\n", action: Selector(), keyEquivalent: ""));
-                            index++;
+                            menu.addItem(NSMenuItem(title: "\(name): \(address)\n", action: nil, keyEquivalent: ""));
+                            index += 1;
                         }
                     }
                 }
-                menu.addItem(NSMenuItem.separatorItem());
+                menu.addItem(NSMenuItem.separator());
             }
 
             var state: Int = 0;
@@ -79,13 +79,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 state = 1;
             }
 
-            let item:NSMenuItem = NSMenuItem(title: "Launch at startup", action: Selector("toggleLaunchAtStartup"), keyEquivalent: "");
+            let item:NSMenuItem = NSMenuItem(title: "Launch at startup", action: #selector(AppDelegate.toggleLaunchAtStartup), keyEquivalent: "");
             item.state = state;
             menu.addItem(item);
 
-            menu.addItem(NSMenuItem(title: "About IP Menu", action: Selector("about"), keyEquivalent: ""));
-            menu.addItem(NSMenuItem.separatorItem());
-            menu.addItem(NSMenuItem(title: "Quit IP Menu", action: Selector("terminate:"), keyEquivalent: "q"));
+            menu.addItem(NSMenuItem(title: "About IP Menu", action: #selector(AppDelegate.about), keyEquivalent: ""));
+            menu.addItem(NSMenuItem.separator());
+            //menu.addItem(NSMenuItem(title: "Quit IP Menu", action: #selector(NSInputServiceProvider.Quit), keyEquivalent: "q"));
+            menu.addItem(NSMenuItem(title: "Quit IP Menu", action: #selector(NSApplication.shared().terminate), keyEquivalent: "q"));
             statusItem!.menu = menu;
         }
 
@@ -94,13 +95,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         // Debug
-        if ( nil == defaultIF || NSComparisonResult.OrderedSame != _defaultIF!.compare(defaultIF!) ) {
+        if ( nil == defaultIF || ComparisonResult.orderedSame != _defaultIF!.compare(defaultIF!) ) {
             ConsoleLog.debug("Detected new default interface (\(defaultIF) -> \(_defaultIF))");
         }
 
         // Pick the default address as the title
         var addr = "127.0.0.1"
-        if ( nil == defaultIF || NSComparisonResult.OrderedSame != _defaultIF!.compare(defaultIF!) || !equal ) {
+        if ( nil == defaultIF || ComparisonResult.orderedSame != _defaultIF!.compare(defaultIF!) || !equal ) {
             defaultIF = _defaultIF;
 
             if ( nil != addresses && nil != addresses![defaultIF!] ) {
@@ -108,9 +109,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 let defaultProtoMap = addresses![defaultIF!];
                 let ipv4 = defaultProtoMap![UInt8(AF_INET)];
                 let ipv6 = defaultProtoMap![UInt8(AF_INET6)];
-                if ( nil != ipv4 && ipv4?.count > 0 ) {
+                if ( nil != ipv4 && ipv4!.count > 0 ) {
                     addr = ipv4![0];
-                } else if ( nil != ipv6 && ipv6?.count > 0 ) {
+                } else if ( nil != ipv6 && ipv6!.count > 0 ) {
                     addr = ipv6![0];
                 } else {
                     print("No ipv4 or ipv6 addresses detected");
@@ -123,7 +124,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    func compareAddresses(oldA:[String:[sa_family_t:[String]]]?, newA:[String:[sa_family_t:[String]]]) -> Bool {
+    func compareAddresses(_ oldA:[String:[sa_family_t:[String]]]?, newA:[String:[sa_family_t:[String]]]) -> Bool {
         if ( nil == oldA || newA.count != oldA!.count ) {
             return false;
         } else {
@@ -146,7 +147,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     for newAddr in newAddresses {
                         for oldAddr in oldAddresses {
                             // Now check if there are the same addresses as previous
-                            if ( NSComparisonResult.OrderedSame == newAddr.compare(oldAddr) ) {
+                            if ( ComparisonResult.orderedSame == newAddr.compare(oldAddr) ) {
                                 found = true;
                                 break;
                             }
@@ -163,8 +164,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func about() {
-        if let checkURL = NSURL(string: "http://www.disrvptor.com") {
-            NSWorkspace.sharedWorkspace().openURL(checkURL);
+        if let checkURL = URL(string: "http://www.disrvptor.com") {
+            NSWorkspace.shared().open(checkURL);
         }
     }
 
@@ -173,36 +174,36 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return (itemReferencesInLoginItems().existingReference != nil)
     }
 
-    func itemReferencesInLoginItems() -> (existingReference: LSSharedFileListItemRef?, lastReference: LSSharedFileListItemRef?) {
-        if let appUrl : NSURL = NSURL.fileURLWithPath(NSBundle.mainBundle().bundlePath) {
-            let loginItemsRef = LSSharedFileListCreate(
-                nil,
-                kLSSharedFileListSessionLoginItems.takeRetainedValue(),
-                nil
-                ).takeRetainedValue() as LSSharedFileListRef?
-            if loginItemsRef != nil {
-                let loginItems: NSArray = LSSharedFileListCopySnapshot(loginItemsRef, nil).takeRetainedValue() as NSArray
-                if ( loginItems.count > 0 ) {
-                    let lastItemRef: LSSharedFileListItemRef = loginItems.lastObject as! LSSharedFileListItemRef
-                    for var i = 0; i < loginItems.count; ++i {
-                        let currentItemRef: LSSharedFileListItemRef = loginItems.objectAtIndex(i) as! LSSharedFileListItemRef
-                        if let urlRef: Unmanaged<CFURL> = LSSharedFileListItemCopyResolvedURL(currentItemRef, 0, nil) {
-                            let urlRef:NSURL = urlRef.takeRetainedValue();
-                            if urlRef.isEqual(appUrl) {
-                                return (currentItemRef, lastItemRef)
-                            }
-                        } else {
-                            print("Unknown login application");
+    func itemReferencesInLoginItems() -> (existingReference: LSSharedFileListItem?, lastReference: LSSharedFileListItem?) {
+        let appUrl : URL = URL(fileURLWithPath: Bundle.main.bundlePath)
+        let loginItemsRef = LSSharedFileListCreate(
+            nil,
+            kLSSharedFileListSessionLoginItems.takeRetainedValue(),
+            nil
+            ).takeRetainedValue() as LSSharedFileList?
+        if loginItemsRef != nil {
+            let loginItems: NSArray = LSSharedFileListCopySnapshot(loginItemsRef, nil).takeRetainedValue() as NSArray
+            if ( loginItems.count > 0 ) {
+                let lastItemRef: LSSharedFileListItem = loginItems.lastObject as! LSSharedFileListItem
+                for i in 0 ..< loginItems.count {
+                    let currentItemRef: LSSharedFileListItem = loginItems.object(at: i) as! LSSharedFileListItem
+                    if let urlRef: Unmanaged<CFURL> = LSSharedFileListItemCopyResolvedURL(currentItemRef, 0, nil) {
+                        let urlRef:URL = urlRef.takeRetainedValue() as URL;
+                        if urlRef == appUrl {
+                            return (currentItemRef, lastItemRef)
                         }
+                    } else {
+                        print("Unknown login application");
                     }
-                    //The application was not found in the startup list
-                    return (nil, lastItemRef)
-                } else {
-                    let addatstart: LSSharedFileListItemRef = kLSSharedFileListItemBeforeFirst.takeRetainedValue()
-                    return(nil,addatstart)
                 }
+                //The application was not found in the startup list
+                return (nil, lastItemRef)
+            } else {
+                let addatstart: LSSharedFileListItem = kLSSharedFileListItemBeforeFirst.takeRetainedValue()
+                return(nil,addatstart)
             }
         }
+
         return (nil, nil)
     }
 
@@ -213,10 +214,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             nil,
             kLSSharedFileListSessionLoginItems.takeRetainedValue(),
             nil
-            ).takeRetainedValue() as LSSharedFileListRef?
+            ).takeRetainedValue() as LSSharedFileList?
         if loginItemsRef != nil {
             if shouldBeToggled {
-                if let appUrl : CFURLRef = NSURL.fileURLWithPath(NSBundle.mainBundle().bundlePath) {
+                if let appUrl : CFURL = URL(fileURLWithPath: Bundle.main.bundlePath) as CFURL? {
                     LSSharedFileListInsertItemURL(
                         loginItemsRef,
                         itemReferences.lastReference,

@@ -17,45 +17,45 @@ class ConsoleLog {
         case Error = "ERROR"
     }
 
-    private static var currentLevel = Level.Info;
+    fileprivate static var currentLevel = Level.Info;
 
     static func getCurrentLevel() -> Level {
         return ConsoleLog.currentLevel;
     }
 
-    static func setCurrentLevel(level: Level) {
+    static func setCurrentLevel(_ level: Level) {
         ConsoleLog.currentLevel = level;
     }
 
-    static func debug(msg: String) {
+    static func debug(_ msg: String) {
         log(Level.Debug, msg: msg);
     }
 
-    static func info(msg: String) {
+    static func info(_ msg: String) {
         log(Level.Info, msg: msg);
     }
 
-    static func warning(msg: String) {
+    static func warning(_ msg: String) {
         log(Level.Warning, msg: msg);
     }
 
-    static func error(msg: String) {
+    static func error(_ msg: String) {
         log(Level.Error, msg: msg);
     }
 
-    static func log(level: Level, msg: String) {
+    static func log(_ level: Level, msg: String) {
         if ( ConsoleLog.isLevelEnabled(level) ) {
             // ISO 8601
-            let date = NSDate()
-            let formatter = NSDateFormatter()
-            let enUSPosixLocale = NSLocale(localeIdentifier: "en_US_POSIX")
+            let date = Date()
+            let formatter = DateFormatter()
+            let enUSPosixLocale = Locale(identifier: "en_US_POSIX")
             formatter.locale = enUSPosixLocale
             formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
-            print("[\(formatter.stringFromDate(date))] [\(level.rawValue)] \(msg)");
+            print("[\(formatter.string(from: date))] [\(level.rawValue)] \(msg)");
         }
     }
 
-    static func isLevelEnabled(level: Level) -> Bool {
+    static func isLevelEnabled(_ level: Level) -> Bool {
         switch (ConsoleLog.currentLevel) {
         case .Debug: return true;
         case .Info: return (level != .Debug);
