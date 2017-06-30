@@ -32,7 +32,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system().statusItem(withLength: NSVariableStatusItemLength);
 
         // TODO: Figure out ho to modify this for dev/test vs production
-        ConsoleLog.setCurrentLevel(ConsoleLog.Level.Debug);
+        ConsoleLog.setCurrentLevel(ConsoleLog.Level.Info);
 
         updateIPAddress();
 
@@ -49,13 +49,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func updateIPAddress() {
         let _addresses = NetworkUtils.getIFAddresses();
         // Disable this for now because it looks like it may be causing the OS to deadlock
-        //var _defaultIF: String? = "en0"; //NetworkUtils.getDefaultGatewayInterface();
-        var _defaultIF: String? = NetworkUtils.getDefaultGatewayInterfaceShell();
+        //var _defaultIF: String? = "en0";
+        var _defaultIF: String? = NetworkUtils.getDefaultGatewayInterface();
+        //var _defaultIF: String? = NetworkUtils.getDefaultGatewayInterfaceShell();
 
         let equal = compareAddresses(self.addresses, newA: _addresses);
 
         if ( !equal ) {
-            ConsoleLog.debug("Detected new addresses \(addresses) -> \(_addresses)");
+            ConsoleLog.info("Detected new addresses \(String(describing: addresses)) -> \(_addresses)");
 
             addresses = _addresses;
 
@@ -79,6 +80,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 state = 1;
             }
 
+            menu.addItem(NSMenuItem(title: "Refresh", action: #selector(AppDelegate.updateIPAddress), keyEquivalent: ""));
+
             let item:NSMenuItem = NSMenuItem(title: "Launch at startup", action: #selector(AppDelegate.toggleLaunchAtStartup), keyEquivalent: "");
             item.state = state;
             menu.addItem(item);
@@ -96,7 +99,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Debug
         if ( nil == defaultIF || ComparisonResult.orderedSame != _defaultIF!.compare(defaultIF!) ) {
-            ConsoleLog.debug("Detected new default interface (\(defaultIF) -> \(_defaultIF))");
+            ConsoleLog.info("Detected new default interface (\(String(describing: defaultIF)) -> \(String(describing: _defaultIF)))");
         }
 
         // Pick the default address as the title
@@ -120,7 +123,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             statusItem!.title = addr;
         } else {
-            print("No Changes \(defaultIF), \(_defaultIF), \(equal)");
+            print("No Changes \(String(describing: defaultIF)), \(String(describing: _defaultIF)), \(equal)");
         }
     }
 
@@ -164,9 +167,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func about() {
-        if let checkURL = URL(string: "http://www.disrvptor.com") {
-            NSWorkspace.shared().open(checkURL);
-        }
+        let alert = NSAlert();
+        alert.messageText = "IP Menu v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as! String)";
+        alert.informativeText = "Developed by @disrvptor (https://github.com/disrvptor/IPMenu)";
+        alert.alertStyle = .informational;
+        alert.runModal();
     }
 
     // http://stackoverflow.com/questions/26475008/swift-getting-a-mac-app-to-launch-on-startup
@@ -217,7 +222,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             ).takeRetainedValue() as LSSharedFileList?
         if loginItemsRef != nil {
             if shouldBeToggled {
-                if let appUrl : CFURL = URL(fileURLWithPath: Bundle.main.bundlePath) as CFURL? {
+                let appUrl = URL(fileURLWithPath: Bundle.main.bundlePath) as CFURL?;
+                if (nil != appUrl) {
                     LSSharedFileListInsertItemURL(
                         loginItemsRef,
                         itemReferences.lastReference,
