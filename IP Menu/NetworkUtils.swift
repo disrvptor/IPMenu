@@ -93,9 +93,9 @@ class NetworkUtils {
     // Retrieve the default interface name that requests are routed through
     // For example, "en0" or "utun0"
     static func getDefaultGatewayInterface() -> String? {
-        let s = socket(PF_ROUTE, SOCK_RAW, 0);
-        if ( s < 0 ) {
-            print("An error occurred creating a socket");
+        let sock = socket(PF_ROUTE, SOCK_RAW, 0);
+        if ( sock < 0 ) {
+            print("An error occurred creating a socket: \(strerror(errno))");
         }
 
         // TODO: Don't assume default == "0.0.0.0"
@@ -194,14 +194,14 @@ class NetworkUtils {
 
         rtm?.pointee.rtm_msglen = u_short(index);
 
-        let rlen = write(s, buffer, index);
+        let rlen = write(sock, buffer, index);
         if (rlen < 0) {
             print("[WARNING] writing to routing socket");
         }
 
         var l = 0;
         repeat {
-            l = read(s, buffer, buffer_length);
+            l = read(sock, buffer, buffer_length);
         } while (l > 0 && (rtm?.pointee.rtm_seq != seq || rtm?.pointee.rtm_pid != pid));
         if (l < 0) {
             print("[WARNING] read from routing socket");
@@ -270,6 +270,8 @@ class NetworkUtils {
         so_ifa.deallocate(capacity: 1);
 
         buffer.deallocate(capacity: buffer_length);
+
+        close(sock);
 
         return defaultIF;
     }
