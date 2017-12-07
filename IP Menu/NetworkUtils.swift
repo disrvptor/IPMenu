@@ -83,7 +83,8 @@ class NetworkUtils {
         for line in lines! {
             //let line2 = line.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet());
             if let range = line.range(of: "interface: ") {
-                return line.substring(from: range.upperBound);
+                //return line.substring(from: range.upperBound);
+				return String(line[range.upperBound...]);
             }
         }
 

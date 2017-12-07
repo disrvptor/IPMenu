@@ -29,7 +29,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     internal var defaultIF: String?;
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        statusItem = NSStatusBar.system().statusItem(withLength: NSVariableStatusItemLength);
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength);
 
         // TODO: Figure out ho to modify this for dev/test vs production
         ConsoleLog.setCurrentLevel(ConsoleLog.Level.Info);
@@ -42,11 +42,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ aNotification: Notification) {
         timer = nil;
-        NSStatusBar.system().removeStatusItem(statusItem!);
+        NSStatusBar.system.removeStatusItem(statusItem!);
         statusItem = nil;
     }
 
-    func updateIPAddress() {
+    @objc func updateIPAddress() {
         let _addresses = NetworkUtils.getIFAddresses();
         // Disable this for now because it looks like it may be causing the OS to deadlock
         //var _defaultIF: String? = "en0";
@@ -83,13 +83,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             menu.addItem(NSMenuItem(title: "Refresh", action: #selector(AppDelegate.updateIPAddress), keyEquivalent: ""));
 
             let item:NSMenuItem = NSMenuItem(title: "Launch at startup", action: #selector(AppDelegate.toggleLaunchAtStartup), keyEquivalent: "");
-            item.state = state;
+            item.state = NSControl.StateValue(rawValue: state);
             menu.addItem(item);
 
             menu.addItem(NSMenuItem(title: "About IP Menu", action: #selector(AppDelegate.about), keyEquivalent: ""));
             menu.addItem(NSMenuItem.separator());
             //menu.addItem(NSMenuItem(title: "Quit IP Menu", action: #selector(NSInputServiceProvider.Quit), keyEquivalent: "q"));
-            menu.addItem(NSMenuItem(title: "Quit IP Menu", action: #selector(NSApplication.shared().terminate), keyEquivalent: "q"));
+            menu.addItem(NSMenuItem(title: "Quit IP Menu", action: #selector(NSApplication.shared.terminate), keyEquivalent: "q"));
             statusItem!.menu = menu;
         }
 
@@ -166,7 +166,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return true;
     }
 
-    func about() {
+    @objc func about() {
         let alert = NSAlert();
         alert.messageText = "IP Menu v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as! String)";
         alert.informativeText = "Developed by @disrvptor (https://github.com/disrvptor/IPMenu)";
@@ -212,7 +212,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return (nil, nil)
     }
 
-    func toggleLaunchAtStartup() {
+    @objc func toggleLaunchAtStartup() {
         let itemReferences = itemReferencesInLoginItems()
         let shouldBeToggled = (itemReferences.existingReference == nil)
         let loginItemsRef = LSSharedFileListCreate(
