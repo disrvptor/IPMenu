@@ -99,7 +99,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Debug
         if ( nil == defaultIF || ComparisonResult.orderedSame != _defaultIF!.compare(defaultIF!) ) {
-            ConsoleLog.info("Detected new default interface (\(String(describing: defaultIF)) -> \(String(describing: _defaultIF)))");
+            ConsoleLog.info("Detected new default interface (\(defaultIF ?? "unknown") -> \(_defaultIF ?? "unknown"))");
         }
 
         // Pick the default address as the title
@@ -123,7 +123,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             statusItem!.title = addr;
         } else {
-            print("No Changes \(String(describing: defaultIF)), \(String(describing: _defaultIF)), \(equal)");
+            print("No Changes \(defaultIF ?? "unknown"), \(_defaultIF ?? "unknown"), \(equal)");
         }
     }
 

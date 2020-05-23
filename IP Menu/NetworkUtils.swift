@@ -96,7 +96,7 @@ class NetworkUtils {
     static func getDefaultGatewayInterface() -> String? {
         let sock = socket(PF_ROUTE, SOCK_RAW, 0);
         if ( sock < 0 ) {
-            print("An error occurred creating a socket: \(strerror(errno))");
+            print("An error occurred creating a socket: \(String(describing: strerror(errno)))");
         }
 
         // TODO: Don't assume default == "0.0.0.0"
@@ -257,20 +257,29 @@ class NetworkUtils {
 
                     defaultIF = String(cString: sdl_data);
 
-                    sdl_data.deallocate(capacity: 11);
+                    //sdl_data.deallocate(capacity: 11);
+                    sdl_data.deallocate();
                 }
             }
         }
 
         // Cleanup
-        so_dst.deallocate(capacity: 1);
-        so_gate.deallocate(capacity: 1);
-        so_mask.deallocate(capacity: 1);
-        so_genmask.deallocate(capacity: 1);
-        so_ifp.deallocate(capacity: 1);
-        so_ifa.deallocate(capacity: 1);
+//        so_dst.deallocate(capacity: 1);
+//        so_gate.deallocate(capacity: 1);
+//        so_mask.deallocate(capacity: 1);
+//        so_genmask.deallocate(capacity: 1);
+//        so_ifp.deallocate(capacity: 1);
+//        so_ifa.deallocate(capacity: 1);
+//
+//        buffer.deallocate(capacity: buffer_length);
+        so_dst.deallocate();
+        so_gate.deallocate();
+        so_mask.deallocate();
+        so_genmask.deallocate();
+        so_ifp.deallocate();
+        so_ifa.deallocate();
 
-        buffer.deallocate(capacity: buffer_length);
+        buffer.deallocate();
 
         close(sock);
 
